@@ -7,12 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D021FD520F05C43006DBC08 /* StickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D021FD420F05C43006DBC08 /* StickerCell.swift */; };
+		8D8CEE4420EFA4E5001C704B /* StickerCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */; };
 		8DD24FD020EF0F360076193F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FCF20EF0F360076193F /* Assets.xcassets */; };
 		8DD24FD720EF0F360076193F /* Dog MessagesExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8DD24FD620EF0F360076193F /* Dog MessagesExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		8DD24FDC20EF0F360076193F /* Messages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8DD24FDB20EF0F360076193F /* Messages.framework */; };
 		8DD24FDF20EF0F360076193F /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD24FDE20EF0F360076193F /* MessagesViewController.swift */; };
 		8DD24FE220EF0F360076193F /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE020EF0F360076193F /* MainInterface.storyboard */; };
 		8DD24FE420EF0F360076193F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE320EF0F360076193F /* Assets.xcassets */; };
+		8DD24FF020EF12000076193F /* StickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD24FEF20EF12000076193F /* StickerViewController.swift */; };
+		8DD24FF420EF1BEF0076193F /* Stickers in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FF320EF1BEF0076193F /* Stickers */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +44,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8D021FD420F05C43006DBC08 /* StickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCell.swift; sourceTree = "<group>"; };
+		8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionViewController.swift; sourceTree = "<group>"; };
 		8DD24FCC20EF0F320076193F /* Dog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DD24FCF20EF0F360076193F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8DD24FD120EF0F360076193F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -49,6 +55,8 @@
 		8DD24FE120EF0F360076193F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		8DD24FE320EF0F360076193F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8DD24FE520EF0F360076193F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8DD24FEF20EF12000076193F /* StickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerViewController.swift; sourceTree = "<group>"; };
+		8DD24FF320EF1BEF0076193F /* Stickers */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Stickers; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,9 +111,13 @@
 			isa = PBXGroup;
 			children = (
 				8DD24FDE20EF0F360076193F /* MessagesViewController.swift */,
+				8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */,
+				8DD24FEF20EF12000076193F /* StickerViewController.swift */,
+				8D021FD420F05C43006DBC08 /* StickerCell.swift */,
 				8DD24FE020EF0F360076193F /* MainInterface.storyboard */,
 				8DD24FE320EF0F360076193F /* Assets.xcassets */,
 				8DD24FE520EF0F360076193F /* Info.plist */,
+				8DD24FF320EF1BEF0076193F /* Stickers */,
 			);
 			path = "Dog MessagesExtension";
 			sourceTree = "<group>";
@@ -198,6 +210,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DD24FE420EF0F360076193F /* Assets.xcassets in Resources */,
+				8DD24FF420EF1BEF0076193F /* Stickers in Resources */,
 				8DD24FE220EF0F360076193F /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -209,7 +222,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DD24FF020EF12000076193F /* StickerViewController.swift in Sources */,
+				8D021FD520F05C43006DBC08 /* StickerCell.swift in Sources */,
 				8DD24FDF20EF0F360076193F /* MessagesViewController.swift in Sources */,
+				8D8CEE4420EFA4E5001C704B /* StickerCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +372,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -376,6 +393,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -397,6 +415,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = Dog/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mikekavouras.Dog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
@@ -412,6 +431,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = Dog/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mikekavouras.Dog;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
