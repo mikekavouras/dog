@@ -53,7 +53,8 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         "glasses", "bow", "wow",
         "nice", "thank-you", "smol",
         "tell-me-more", "noo", "tricks",
-        "hey2", "this"
+        "hey2", "this", "aw_baby", "butt",
+        "cold", "never", "what", 
     ]
     
     // MARK: UICollectionViewDataSource
