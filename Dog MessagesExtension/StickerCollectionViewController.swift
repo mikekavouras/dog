@@ -44,17 +44,20 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
     
     private var sortedStickerNames = [
-        "dog", "cat", "ok", "cute",
-        "woah", "cool", "ha", "wyut",
-        "hai", "hey", "help", "hello",
-        "no", "sorry", "down", "yes",
-        "mine", "call-me", "buds", "sup",
-        "sad", "fish", "ball", "hat",
-        "glasses", "bow", "wow",
-        "nice", "thank-you", "smol",
-        "tell-me-more", "noo", "tricks",
-        "hey2", "this", "aw_baby", "butt",
-        "cold", "never", "what", 
+        "dog", "cat", "ok",
+        "cute", "woah", "cool",
+        "ha", "wyut", "hai",
+        "hey2", "help", "hello",
+        "no", "sorry", "down",
+        "yes", "mine", "call-me",
+        "buds", "thank-you", "sup",
+        "fish", "ball", "hat",
+        "glasses", "wow", "bow",
+        "So-SMOL", "nice", "this",
+        "Noo", "tell-me-more", "tricks",
+        "hey", "never", "aw_baby",
+        "butt", "cold", "what",
+        "this", "dead", "sad",
     ]
     
     // MARK: UICollectionViewDataSource
