@@ -15,7 +15,6 @@
 		8DD24FDF20EF0F360076193F /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD24FDE20EF0F360076193F /* MessagesViewController.swift */; };
 		8DD24FE220EF0F360076193F /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE020EF0F360076193F /* MainInterface.storyboard */; };
 		8DD24FE420EF0F360076193F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE320EF0F360076193F /* Assets.xcassets */; };
-		8DD24FF020EF12000076193F /* StickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DD24FEF20EF12000076193F /* StickerViewController.swift */; };
 		8DD24FF420EF1BEF0076193F /* Stickers in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FF320EF1BEF0076193F /* Stickers */; };
 /* End PBXBuildFile section */
 
@@ -55,7 +54,6 @@
 		8DD24FE120EF0F360076193F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		8DD24FE320EF0F360076193F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8DD24FE520EF0F360076193F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8DD24FEF20EF12000076193F /* StickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerViewController.swift; sourceTree = "<group>"; };
 		8DD24FF320EF1BEF0076193F /* Stickers */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Stickers; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -112,7 +110,6 @@
 			children = (
 				8DD24FDE20EF0F360076193F /* MessagesViewController.swift */,
 				8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */,
-				8DD24FEF20EF12000076193F /* StickerViewController.swift */,
 				8D021FD420F05C43006DBC08 /* StickerCell.swift */,
 				8DD24FE020EF0F360076193F /* MainInterface.storyboard */,
 				8DD24FE320EF0F360076193F /* Assets.xcassets */,
@@ -222,7 +219,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8DD24FF020EF12000076193F /* StickerViewController.swift in Sources */,
 				8D021FD520F05C43006DBC08 /* StickerCell.swift in Sources */,
 				8DD24FDF20EF0F360076193F /* MessagesViewController.swift in Sources */,
 				8D8CEE4420EFA4E5001C704B /* StickerCollectionViewController.swift in Sources */,

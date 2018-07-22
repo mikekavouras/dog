@@ -7,12 +7,14 @@
 //
 
 import UIKit
+import Messages
 
 private let reuseIdentifier = "Cell"
 
 class StickerCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     fileprivate let padding: CGFloat = 8
     fileprivate let perRow: CGFloat = 3
+    private var stickers = [MSSticker]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,21 +23,38 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
 
     private func setup() {
-        setupCollectionView()
         setupStickers()
     }
-    
-    private func setupCollectionView() {
-        self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-    }
-    
+
     private func setupStickers() {
         loadStickers()
     }
     
     private func loadStickers() {
-        
+        let dir = "Stickers"
+        let bundle = Bundle(for: type(of: self))
+        stickers = sortedStickerNames.map { name in
+            guard let filename = name.split(separator: ".").first,
+                let url = bundle.url(forResource: "/\(dir)/\(filename)", withExtension: "png") else
+            {
+                return nil
+            }
+            return try? MSSticker(contentsOfFileURL: url, localizedDescription: "")
+            }.compactMap { $0 }
     }
+    
+    private var sortedStickerNames = [
+        "dog", "cat", "ok", "cute",
+        "woah", "cool", "ha", "wyut",
+        "hai", "hey", "help", "hello",
+        "no", "sorry", "down", "yes",
+        "mine", "call-me", "buds", "sup",
+        "sad", "fish", "ball", "hat",
+        "glasses", "bow", "wow",
+        "nice", "thank-you", "smol",
+        "tell-me-more", "noo", "tricks",
+        "hey2", "this"
+    ]
     
     // MARK: UICollectionViewDataSource
 
@@ -45,14 +64,14 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 5
+        return stickers.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? StickerCell else {
             return UICollectionViewCell()
         }
-        cell.backgroundColor = .red
+        cell.stickerView.sticker = stickers[indexPath.row]
         return cell
     }
 }
