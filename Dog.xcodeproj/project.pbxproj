@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8D021FD520F05C43006DBC08 /* StickerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D021FD420F05C43006DBC08 /* StickerCell.swift */; };
+		8D144A39216FFAD500AD925E /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D144A38216FFAD500AD925E /* CloudKit.framework */; };
 		8D8CEE4420EFA4E5001C704B /* StickerCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */; };
 		8DD24FD020EF0F360076193F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FCF20EF0F360076193F /* Assets.xcassets */; };
 		8DD24FD720EF0F360076193F /* Dog MessagesExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8DD24FD620EF0F360076193F /* Dog MessagesExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -44,6 +45,8 @@
 
 /* Begin PBXFileReference section */
 		8D021FD420F05C43006DBC08 /* StickerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCell.swift; sourceTree = "<group>"; };
+		8D144A37216FFACE00AD925E /* Dog MessagesExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Dog MessagesExtension.entitlements"; sourceTree = "<group>"; };
+		8D144A38216FFAD500AD925E /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerCollectionViewController.swift; sourceTree = "<group>"; };
 		8DD24FCC20EF0F320076193F /* Dog.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dog.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8DD24FCF20EF0F360076193F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -63,6 +66,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8DD24FDC20EF0F360076193F /* Messages.framework in Frameworks */,
+				8D144A39216FFAD500AD925E /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +104,7 @@
 		8DD24FDA20EF0F360076193F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8D144A38216FFAD500AD925E /* CloudKit.framework */,
 				8DD24FDB20EF0F360076193F /* Messages.framework */,
 			);
 			name = Frameworks;
@@ -108,6 +113,7 @@
 		8DD24FDD20EF0F360076193F /* Dog MessagesExtension */ = {
 			isa = PBXGroup;
 			children = (
+				8D144A37216FFACE00AD925E /* Dog MessagesExtension.entitlements */,
 				8DD24FDE20EF0F360076193F /* MessagesViewController.swift */,
 				8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */,
 				8D021FD420F05C43006DBC08 /* StickerCell.swift */,
@@ -171,6 +177,14 @@
 					};
 					8DD24FD520EF0F360076193F = {
 						CreatedOnToolsVersion = 9.4.1;
+						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -365,6 +379,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = "Dog MessagesExtension/Dog MessagesExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
@@ -386,6 +401,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = "Dog MessagesExtension/Dog MessagesExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
