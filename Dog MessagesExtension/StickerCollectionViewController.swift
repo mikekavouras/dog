@@ -46,7 +46,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         
         fetchStickers { maybeRecords in
             guard let records = maybeRecords else { return }
-            // generate images from asset data
             
             records.forEach { record in
                 if let asset = record["image"] as? CKAsset,
@@ -54,7 +53,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                     let image = UIImage(data: data)
                 {
                     let filename = "\(path)/\(record.recordID.recordName).png"
-                    print(filename)
                     let png = UIImagePNGRepresentation(image)
                     do {
                         let url = URL(fileURLWithPath: filename)
@@ -98,9 +96,11 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
 }
 
+// MARK: - UICollectionViewDataSource
+// MARK: -
+
 extension StickerCollectionViewController {
-    
-    // MARK: UICollectionViewDataSource
+
 
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -119,6 +119,9 @@ extension StickerCollectionViewController {
         return cell
     }
 }
+
+// MARK: - UICollectionViewDelegateFlowLayout
+// MARK: - 
 
 extension StickerCollectionViewController {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
