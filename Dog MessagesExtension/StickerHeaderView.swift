@@ -18,8 +18,6 @@ class StickerHeaderView: UICollectionReusableView {
     
     weak var delegate: StickerHeaderViewDelegate?
     
-    private var animationTimer: Timer?
-    
     // MARK: - Layout Constants
     static let containerVerticalPadding: CGFloat = 4 // top and bottom padding around container
     static let containerHorizontalPadding: CGFloat = 20 // left and right padding around container
@@ -65,9 +63,26 @@ class StickerHeaderView: UICollectionReusableView {
         return max(minHeight, calculatedHeight)
     }
     
+    private let blurEffectView: UIVisualEffectView = {
+        // Use Liquid Glass effect if available (iOS 26.0+), fallback to blur
+        let effect: UIVisualEffect
+        if #available(iOS 26.0, *) {
+            let glassEffect = UIGlassEffect()
+            // Make the glass interactive so it reacts to touch
+            glassEffect.isInteractive = true
+            effect = glassEffect
+        } else {
+            // Fallback to standard blur for iOS < 26.0
+            effect = UIBlurEffect(style: .systemMaterial)
+        }
+        let effectView = UIVisualEffectView(effect: effect)
+        effectView.translatesAutoresizingMaskIntoConstraints = false
+        return effectView
+    }()
+    
     private let containerView: UIView = {
         let view = UIView()
-        view.backgroundColor = .secondarySystemBackground
+        view.backgroundColor = .clear // Make transparent so blur shows through
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -170,13 +185,16 @@ class StickerHeaderView: UICollectionReusableView {
     private func setupViews() {
         addSubview(containerView)
         
+        // Add blur effect as the background of the container
+        containerView.addSubview(blurEffectView)
+        
         // Add icon and label stack to content stack
         contentStack.addArrangedSubview(leadingIcon)
         contentStack.addArrangedSubview(labelStack)
         
-        // Add subviews directly to container
-        containerView.addSubview(contentStack)
-        containerView.addSubview(dismissButton)
+        // Add subviews to the blur's content view for proper layering
+        blurEffectView.contentView.addSubview(contentStack)
+        blurEffectView.contentView.addSubview(dismissButton)
         
         NSLayoutConstraint.activate([
             // Container constraints (with padding)
@@ -184,6 +202,12 @@ class StickerHeaderView: UICollectionReusableView {
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: Self.containerHorizontalPadding),
             containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -Self.containerHorizontalPadding),
             containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Self.containerVerticalPadding),
+            
+            // Blur effect fills the entire container
+            blurEffectView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            blurEffectView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            blurEffectView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            blurEffectView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             
             // Leading icon size
             leadingIcon.widthAnchor.constraint(equalToConstant: Self.iconWidth),
@@ -206,9 +230,13 @@ class StickerHeaderView: UICollectionReusableView {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        // Make container fully rounded (pill shape)
-        containerView.layer.cornerRadius = containerView.bounds.height / 2
+        // Make container and blur fully rounded (pill shape)
+        let cornerRadius = containerView.bounds.height / 2
+        containerView.layer.cornerRadius = cornerRadius
         containerView.layer.masksToBounds = true
+        
+        blurEffectView.layer.cornerRadius = cornerRadius
+        blurEffectView.layer.masksToBounds = true
         
         // Make dismiss button fully rounded (circle)
         dismissButton.layer.cornerRadius = dismissButton.bounds.height / 2
@@ -228,25 +256,34 @@ class StickerHeaderView: UICollectionReusableView {
     }
     
     private func startIconAnimation() {
-        // Trigger the first animation immediately
-        triggerWiggleAnimation()
-        
-        // Set up a timer to repeat the animation every 3 seconds
-        animationTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
-            self?.triggerWiggleAnimation()
+        // Use manual UIView animation for reliable, predictable behavior
+        // This avoids issues with symbol effects getting stuck in scaled states
+        animateIconManually()
+    }
+    
+    private func animateIconManually() {
+        // Simple scale down animation
+        UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.5, options: [.curveEaseInOut], animations: {
+            self.leadingIcon.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+        }) { _ in
+            // Scale back up after a short pause
+            UIView.animate(withDuration: 0.35, delay: 0.2, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.5, options: [.curveEaseInOut], animations: {
+                self.leadingIcon.transform = .identity
+            }) { _ in
+                // Wait 3 seconds then repeat
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    if self.window != nil {
+                        self.animateIconManually()
+                    }
+                }
+            }
         }
     }
     
-    private func triggerWiggleAnimation() {
-        // Use the SF Symbols animation API
-        // Wiggle animation with byLayer and Up direction
-        let wiggleEffect: WiggleSymbolEffect = .wiggle.up.byLayer
-        leadingIcon.addSymbolEffect(wiggleEffect)
-    }
-    
     private func stopIconAnimation() {
-        animationTimer?.invalidate()
-        animationTimer = nil
+        // Clean up all animations and reset transform
+        leadingIcon.layer.removeAllAnimations()
+        leadingIcon.transform = .identity
     }
     
     @objc private func dismissButtonTapped() {

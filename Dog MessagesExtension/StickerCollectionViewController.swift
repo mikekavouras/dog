@@ -17,8 +17,13 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     private var stickers = [MSSticker]()
     private var isFirstLaunch = true
     
+    // MARK: - Header Configuration
+    
     // Header message constant to avoid duplication
     private let headerMessage = "Hold a sticker and drag it onto any message"
+    
+    // Distance from the bottom of the screen (0 = flush with bottom, negative = moves up from bottom)
+    private let headerBottomSpacing: CGFloat = 14
     
     // Header dismissal state
     private var isHeaderDismissed: Bool {
@@ -29,6 +34,15 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
             UserDefaults.standard.set(newValue, forKey: "stickerHeaderDismissed")
         }
     }
+    
+    // Fixed bottom header view
+    private lazy var stickerHeaderView: StickerHeaderView = {
+        let header = StickerHeaderView()
+        header.delegate = self
+        header.configure(message: headerMessage)
+        header.translatesAutoresizingMaskIntoConstraints = false
+        return header
+    }()
     
     // Calculate columns dynamically based on width
     private var columnsPerRow: CGFloat {
@@ -58,17 +72,55 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         // MARK: - DEBUG: Uncomment to reset header dismissal for testing
 //         UserDefaults.standard.removeObject(forKey: "stickerHeaderDismissed")
 
-        // Register the header view
-        collectionView?.register(StickerHeaderView.self, 
-                                 forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, 
-                                withReuseIdentifier: "StickerHeaderView")
-        
         // Set up liquid glass first (if enabled)
         // Temporarily disabled to test
         // setupLiquidGlassBackground()
         
+        // Setup the fixed bottom header
+        setupFixedBottomHeader()
+        
         // Load stickers synchronously before first display to avoid flicker
         loadInitialStickers()
+    }
+    
+    
+    // MARK: - Fixed Bottom Header Setup
+    
+    private func setupFixedBottomHeader() {
+        guard !isHeaderDismissed else { return }
+        
+        // Add header to the view hierarchy (not the collection view)
+        view.addSubview(stickerHeaderView)
+        
+        // Calculate header height
+        let headerHeight = StickerHeaderView.calculateHeight(for: view.bounds.width, message: headerMessage)
+        
+        NSLayoutConstraint.activate([
+            stickerHeaderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stickerHeaderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            // Pin to bottom with configurable spacing
+            // Positive values move down, negative values move up
+            stickerHeaderView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -headerBottomSpacing),
+            stickerHeaderView.heightAnchor.constraint(equalToConstant: headerHeight)
+        ])
+        
+        // Adjust collection view bottom inset to account for fixed header
+        updateCollectionViewInsets(headerHeight: headerHeight)
+    }
+    
+    private func updateCollectionViewInsets(headerHeight: CGFloat) {
+        guard let collectionView = collectionView else { return }
+        
+        // Add extra bottom inset so content doesn't get hidden behind header
+        // Include both the header height AND the bottom spacing
+        var contentInset = collectionView.contentInset
+        contentInset.bottom = headerHeight + headerBottomSpacing
+        collectionView.contentInset = contentInset
+        
+        // Also adjust scroll indicator insets
+        var scrollIndicatorInsets = collectionView.scrollIndicatorInsets
+        scrollIndicatorInsets.bottom = headerHeight + headerBottomSpacing
+        collectionView.scrollIndicatorInsets = scrollIndicatorInsets
     }
     
     private func showLoadingIndicator() {
@@ -113,6 +165,16 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         // Invalidate layout when rotating to recalculate cell sizes
         coordinator.animate(alongsideTransition: { _ in
             self.collectionView?.collectionViewLayout.invalidateLayout()
+            
+            // Recalculate header height for new width
+            if !self.isHeaderDismissed {
+                let newHeaderHeight = StickerHeaderView.calculateHeight(for: size.width, message: self.headerMessage)
+                // Update header height constraint
+                if let heightConstraint = self.stickerHeaderView.constraints.first(where: { $0.firstAttribute == .height }) {
+                    heightConstraint.constant = newHeaderHeight
+                }
+                self.updateCollectionViewInsets(headerHeight: newHeaderHeight)
+            }
         }, completion: nil)
     }
     
@@ -436,40 +498,12 @@ extension StickerCollectionViewController {
         cell.stickerView.sticker = stickers[indexPath.row]
         return cell
     }
-    
-    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        if kind == UICollectionElementKindSectionHeader {
-            guard let headerView = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: "StickerHeaderView",
-                for: indexPath
-            ) as? StickerHeaderView else {
-                return UICollectionReusableView()
-            }
-            
-            headerView.delegate = self
-            headerView.configure(message: headerMessage)
-            return headerView
-        }
-        
-        return UICollectionReusableView()
-    }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
 // MARK: - 
 
 extension StickerCollectionViewController {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        // Only show header if not dismissed and stickers are loaded
-        if !isHeaderDismissed && !stickers.isEmpty {
-            let width = collectionView.bounds.width
-            let height = StickerHeaderView.calculateHeight(for: width, message: headerMessage)
-            return CGSize(width: width, height: height)
-        }
-        return .zero
-    }
-    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         // Use collection view's current width for accurate sizing during rotation
         let collectionWidth = collectionView.bounds.width
@@ -501,9 +535,16 @@ extension StickerCollectionViewController: StickerHeaderViewDelegate {
         isHeaderDismissed = true
         
         // Animate header removal
-        collectionView?.performBatchUpdates({
-            collectionView?.collectionViewLayout.invalidateLayout()
-        }, completion: nil)
+        UIView.animate(withDuration: 0.3, animations: {
+            self.stickerHeaderView.alpha = 0
+            self.stickerHeaderView.transform = CGAffineTransform(translationX: 0, y: 20)
+            
+            // Reset collection view insets
+            self.collectionView?.contentInset.bottom = 0
+            self.collectionView?.scrollIndicatorInsets.bottom = 0
+        }) { _ in
+            self.stickerHeaderView.removeFromSuperview()
+        }
     }
 }
 
