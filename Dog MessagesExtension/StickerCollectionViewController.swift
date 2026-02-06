@@ -11,7 +11,6 @@ import Messages
 import CloudKit
 
 private let reuseIdentifier = "Cell"
-private let loadingReuseIdentifier = "LoadingCell"
 
 class StickerCollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
     fileprivate let padding: CGFloat = 8
@@ -64,42 +63,32 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                                  forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, 
                                 withReuseIdentifier: "StickerHeaderView")
         
-        // Set up loading view for first launch
-        setupLoadingView()
-        
         // Set up liquid glass first (if enabled)
         // Temporarily disabled to test
         // setupLiquidGlassBackground()
         
-        setup()
-    }
-    
-    private func setupLoadingView() {
-        // Don't show loading by default - only if we detect first launch
+        // Load stickers synchronously before first display to avoid flicker
+        loadInitialStickers()
     }
     
     private func showLoadingIndicator() {
         guard collectionView?.backgroundView == nil else { return }
         
         print("📍 Showing loading indicator")
-        // Create a container view that fills the entire collection view
         let loadingBackgroundView = UIView()
         loadingBackgroundView.backgroundColor = .clear
         
-        // Create activity indicator
         let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .large)
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.color = .label
         activityIndicator.startAnimating()
         loadingBackgroundView.addSubview(activityIndicator)
         
-        // Center the activity indicator
         NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: loadingBackgroundView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: loadingBackgroundView.centerYAnchor)
         ])
         
-        // Set as background view
         collectionView?.backgroundView = loadingBackgroundView
     }
     
@@ -181,70 +170,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         }
     }
 
-    private func setup() {
-        setupStickers()
-        setupFileSystem()
-    }
-
-    private func setupStickers() {
-        guard let directoryURL = documentDirectoryPath else { 
-            return 
-        }
-        
-        Task {
-            // STEP 1: Load cached stickers IMMEDIATELY and show them (no loading state)
-            await loadCachedStickersAndDisplay(from: directoryURL)
-            
-            // STEP 2: Sync with CloudKit in the background (silently)
-            await syncWithCloudKit(directoryURL: directoryURL)
-        }
-    }
-    
-    private func loadCachedStickersAndDisplay(from directoryURL: URL) async {
-        print("📂 Loading cached stickers from: \(directoryURL.path)")
-        let manager = FileManager.default
-        
-        guard let fileURLs = try? manager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
-            .filter({ $0.pathExtension == "png" })
-            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
-        else { 
-            print("📭 No cached stickers found - first launch, showing loading indicator")
-            await MainActor.run {
-                showLoadingIndicator()
-            }
-            return 
-        }
-        
-        print("📦 Found \(fileURLs.count) cached sticker files")
-        let metadata = loadStickerMetadata()
-        
-        // Load all cached stickers
-        var cachedStickers: [MSSticker] = []
-        for fileURL in fileURLs {
-            let recordName = fileURL.deletingPathExtension().lastPathComponent
-            let description = metadata[recordName]?.description ?? "Dog Sticker"
-            
-            if let sticker = try? MSSticker(contentsOfFileURL: fileURL, localizedDescription: description) {
-                cachedStickers.append(sticker)
-            }
-        }
-        
-        if !cachedStickers.isEmpty {
-            print("✅ Loaded \(cachedStickers.count) cached stickers - displaying immediately")
-            isFirstLaunch = false
-            await MainActor.run {
-                self.stickers = cachedStickers
-                print("🔄 Reloading collection view with cached stickers")
-                self.collectionView?.reloadData()
-            }
-        } else {
-            print("⚠️ Found files but couldn't load stickers - showing loading indicator")
-            await MainActor.run {
-                showLoadingIndicator()
-            }
-        }
-    }
-    
     private func syncWithCloudKit(directoryURL: URL) async {
         print("🔄 Starting background sync with CloudKit...")
         
@@ -403,6 +328,60 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         
         if let data = try? JSONEncoder().encode(metadata) {
             try? data.write(to: fileURL)
+        }
+    }
+    
+    // MARK: - Initial Loading (Synchronous to prevent flicker)
+    
+    private func loadInitialStickers() {
+        // Create directory if needed
+        guard let directoryURL = documentDirectoryPath else { return }
+        
+        let manager = FileManager.default
+        if !manager.fileExists(atPath: directoryURL.path) {
+            try? manager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+        }
+        
+        // Load cached stickers SYNCHRONOUSLY on main thread
+        // This prevents the flicker on launch by having content ready before first display
+        print("📂 Loading initial stickers synchronously")
+        
+        guard let fileURLs = try? manager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            .filter({ $0.pathExtension == "png" })
+            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+        else {
+            print("📭 No cached stickers - first launch detected")
+            isFirstLaunch = true
+            showLoadingIndicator()
+            // Start async sync for first launch
+            Task { await syncWithCloudKit(directoryURL: directoryURL) }
+            return
+        }
+        
+        let metadata = loadStickerMetadata()
+        var cachedStickers: [MSSticker] = []
+        
+        for fileURL in fileURLs {
+            let recordName = fileURL.deletingPathExtension().lastPathComponent
+            let description = metadata[recordName]?.description ?? "Dog Sticker"
+            
+            if let sticker = try? MSSticker(contentsOfFileURL: fileURL, localizedDescription: description) {
+                cachedStickers.append(sticker)
+            }
+        }
+        
+        if !cachedStickers.isEmpty {
+            print("✅ Loaded \(cachedStickers.count) stickers synchronously - ready for display")
+            self.stickers = cachedStickers
+            isFirstLaunch = false
+            
+            // Now sync in background
+            Task { await syncWithCloudKit(directoryURL: directoryURL) }
+        } else {
+            print("⚠️ Found files but couldn't load - showing loading")
+            isFirstLaunch = true
+            showLoadingIndicator()
+            Task { await syncWithCloudKit(directoryURL: directoryURL) }
         }
     }
     
