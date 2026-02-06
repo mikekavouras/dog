@@ -18,6 +18,19 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     private var stickers = [MSSticker]()
     private var isFirstLaunch = true
     
+    // Header message constant to avoid duplication
+    private let headerMessage = "Hold a sticker and drag it onto any message"
+    
+    // Header dismissal state
+    private var isHeaderDismissed: Bool {
+        get {
+            UserDefaults.standard.bool(forKey: "stickerHeaderDismissed")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "stickerHeaderDismissed")
+        }
+    }
+    
     // Calculate columns dynamically based on width
     private var columnsPerRow: CGFloat {
         guard let collectionView = collectionView else { return 3 }
@@ -42,7 +55,15 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     override func viewDidLoad() {
         super.viewDidLoad()
         print("🟢 viewDidLoad called")
+        
+        // MARK: - DEBUG: Uncomment to reset header dismissal for testing
+//         UserDefaults.standard.removeObject(forKey: "stickerHeaderDismissed")
 
+        // Register the header view
+        collectionView?.register(StickerHeaderView.self, 
+                                 forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, 
+                                withReuseIdentifier: "StickerHeaderView")
+        
         // Set up loading view for first launch
         setupLoadingView()
         
@@ -436,12 +457,40 @@ extension StickerCollectionViewController {
         cell.stickerView.sticker = stickers[indexPath.row]
         return cell
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        if kind == UICollectionElementKindSectionHeader {
+            guard let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: kind,
+                withReuseIdentifier: "StickerHeaderView",
+                for: indexPath
+            ) as? StickerHeaderView else {
+                return UICollectionReusableView()
+            }
+            
+            headerView.delegate = self
+            headerView.configure(message: headerMessage)
+            return headerView
+        }
+        
+        return UICollectionReusableView()
+    }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
 // MARK: - 
 
 extension StickerCollectionViewController {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        // Only show header if not dismissed and stickers are loaded
+        if !isHeaderDismissed && !stickers.isEmpty {
+            let width = collectionView.bounds.width
+            let height = StickerHeaderView.calculateHeight(for: width, message: headerMessage)
+            return CGSize(width: width, height: height)
+        }
+        return .zero
+    }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         // Use collection view's current width for accurate sizing during rotation
         let collectionWidth = collectionView.bounds.width
@@ -462,3 +511,20 @@ extension StickerCollectionViewController {
         return padding
     }
 }
+// MARK: - StickerHeaderViewDelegate
+// MARK: -
+
+extension StickerCollectionViewController: StickerHeaderViewDelegate {
+    func stickerHeaderViewDidTapDismiss(_ headerView: StickerHeaderView) {
+        print("📍 Header dismissed by user")
+        
+        // Save dismissal state
+        isHeaderDismissed = true
+        
+        // Animate header removal
+        collectionView?.performBatchUpdates({
+            collectionView?.collectionViewLayout.invalidateLayout()
+        }, completion: nil)
+    }
+}
+

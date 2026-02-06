@@ -17,6 +17,7 @@
 		8DD24FE220EF0F360076193F /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE020EF0F360076193F /* MainInterface.storyboard */; };
 		8DD24FE420EF0F360076193F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8DD24FE320EF0F360076193F /* Assets.xcassets */; };
 		E5E8A42A2F362EA3000A0795 /* LoadingCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E8A4292F362EA3000A0795 /* LoadingCell.swift */; };
+		E5E8A44A2F368455000A0795 /* StickerHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5E8A4472F368455000A0795 /* StickerHeaderView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +59,7 @@
 		8DD24FE320EF0F360076193F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8DD24FE520EF0F360076193F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E5E8A4292F362EA3000A0795 /* LoadingCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCell.swift; sourceTree = "<group>"; };
+		E5E8A4472F368455000A0795 /* StickerHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerHeaderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 		8DD24FDD20EF0F360076193F /* Dog MessagesExtension */ = {
 			isa = PBXGroup;
 			children = (
+				E5E8A4472F368455000A0795 /* StickerHeaderView.swift */,
 				8D144A37216FFACE00AD925E /* Dog MessagesExtension.entitlements */,
 				8DD24FDE20EF0F360076193F /* MessagesViewController.swift */,
 				8D8CEE4320EFA4E4001C704B /* StickerCollectionViewController.swift */,
@@ -168,7 +171,7 @@
 		8DD24FC620EF0F320076193F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0940;
+				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 0940;
 				ORGANIZATIONNAME = Mike;
 				TargetAttributes = {
@@ -234,6 +237,7 @@
 			files = (
 				8D021FD520F05C43006DBC08 /* StickerCell.swift in Sources */,
 				8DD24FDF20EF0F360076193F /* MessagesViewController.swift in Sources */,
+				E5E8A44A2F368455000A0795 /* StickerHeaderView.swift in Sources */,
 				E5E8A42A2F362EA3000A0795 /* LoadingCell.swift in Sources */,
 				8D8CEE4420EFA4E5001C704B /* StickerCollectionViewController.swift in Sources */,
 			);
@@ -383,7 +387,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -405,7 +409,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A56D86G827;
 				INFOPLIST_FILE = "Dog MessagesExtension/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -422,7 +426,6 @@
 		8DD24FED20EF0F360076193F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
@@ -438,7 +441,6 @@
 		8DD24FEE20EF0F360076193F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = "";
