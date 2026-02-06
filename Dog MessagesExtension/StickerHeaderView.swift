@@ -64,19 +64,10 @@ class StickerHeaderView: UICollectionReusableView {
     }
     
     private let blurEffectView: UIVisualEffectView = {
-        // Use Liquid Glass effect if available (iOS 26.0+), fallback to blur
-        let effect: UIVisualEffect
-        if #available(iOS 26.0, *) {
-            let glassEffect = UIGlassEffect()
-            // Make the glass interactive so it reacts to touch
-            glassEffect.isInteractive = true
-            effect = glassEffect
-        } else {
-            // Fallback to standard blur for iOS < 26.0
-            effect = UIBlurEffect(style: .systemMaterial)
-        }
-        let effectView = UIVisualEffectView(effect: effect)
+        // Use a simple secondary system background color
+        let effectView = UIVisualEffectView()
         effectView.translatesAutoresizingMaskIntoConstraints = false
+        effectView.backgroundColor = .secondarySystemBackground
         return effectView
     }()
     
@@ -106,6 +97,20 @@ class StickerHeaderView: UICollectionReusableView {
         icon.contentMode = .scaleAspectFit
         icon.translatesAutoresizingMaskIntoConstraints = false
         icon.isUserInteractionEnabled = false
+        return icon
+    }()
+    
+    // Separate overlay for the "tap" highlight part
+    private let tapHighlightIcon: UIImageView = {
+        let icon = UIImageView()
+        // Use a palette rendering to control the tap color specifically
+        let config = UIImage.SymbolConfiguration(pointSize: 28, weight: .medium)
+            .applying(UIImage.SymbolConfiguration(paletteColors: [.label.withAlphaComponent(0.3), .clear]))
+        icon.image = UIImage(systemName: "hand.tap.fill", withConfiguration: config)
+        icon.contentMode = .scaleAspectFit
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        icon.isUserInteractionEnabled = false
+        icon.alpha = 0 // Start invisible
         return icon
     }()
     
@@ -188,8 +193,16 @@ class StickerHeaderView: UICollectionReusableView {
         // Add blur effect as the background of the container
         containerView.addSubview(blurEffectView)
         
-        // Add icon and label stack to content stack
-        contentStack.addArrangedSubview(leadingIcon)
+        // Create a container for the icon that will hold both layers
+        let iconContainer = UIView()
+        iconContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add both icon layers to the container
+        iconContainer.addSubview(leadingIcon)
+        iconContainer.addSubview(tapHighlightIcon)
+        
+        // Add icon container and label stack to content stack
+        contentStack.addArrangedSubview(iconContainer)
         contentStack.addArrangedSubview(labelStack)
         
         // Add subviews to the blur's content view for proper layering
@@ -209,9 +222,20 @@ class StickerHeaderView: UICollectionReusableView {
             blurEffectView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             blurEffectView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
             
-            // Leading icon size
-            leadingIcon.widthAnchor.constraint(equalToConstant: Self.iconWidth),
-            leadingIcon.heightAnchor.constraint(equalToConstant: Self.iconWidth),
+            // Icon container size
+            iconContainer.widthAnchor.constraint(equalToConstant: Self.iconWidth),
+            iconContainer.heightAnchor.constraint(equalToConstant: Self.iconWidth),
+            
+            // Both icon layers fill the container perfectly aligned
+            leadingIcon.topAnchor.constraint(equalTo: iconContainer.topAnchor),
+            leadingIcon.leadingAnchor.constraint(equalTo: iconContainer.leadingAnchor),
+            leadingIcon.trailingAnchor.constraint(equalTo: iconContainer.trailingAnchor),
+            leadingIcon.bottomAnchor.constraint(equalTo: iconContainer.bottomAnchor),
+            
+            tapHighlightIcon.topAnchor.constraint(equalTo: iconContainer.topAnchor),
+            tapHighlightIcon.leadingAnchor.constraint(equalTo: iconContainer.leadingAnchor),
+            tapHighlightIcon.trailingAnchor.constraint(equalTo: iconContainer.trailingAnchor),
+            tapHighlightIcon.bottomAnchor.constraint(equalTo: iconContainer.bottomAnchor),
             
             // Content stack positioning - with vertical padding
             contentStack.topAnchor.constraint(equalTo: containerView.topAnchor, constant: Self.contentVerticalPadding),
@@ -243,6 +267,8 @@ class StickerHeaderView: UICollectionReusableView {
         dismissButton.layer.masksToBounds = true
     }
     
+    private var hasAnimatedIn = false
+    
     override func didMoveToWindow() {
         super.didMoveToWindow()
         
@@ -255,6 +281,30 @@ class StickerHeaderView: UICollectionReusableView {
         }
     }
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        hasAnimatedIn = false
+        containerView.transform = .identity
+        containerView.alpha = 1.0
+    }
+    
+    func animateIn() {
+        guard !hasAnimatedIn else { return }
+        hasAnimatedIn = true
+        
+        // Start scaled down and shifted up
+        let scaleTransform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        let translateTransform = CGAffineTransform(translationX: 0, y: 10)
+        containerView.transform = scaleTransform.concatenating(translateTransform)
+        containerView.alpha = 0
+        
+        // Spring down to normal size and position with a slight delay for polish
+        UIView.animate(withDuration: 0.6, delay: 0.3, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [.curveEaseOut], animations: {
+            self.containerView.transform = .identity
+            self.containerView.alpha = 1.0
+        }, completion: nil)
+    }
+    
     private func startIconAnimation() {
         // Use manual UIView animation for reliable, predictable behavior
         // This avoids issues with symbol effects getting stuck in scaled states
@@ -262,18 +312,35 @@ class StickerHeaderView: UICollectionReusableView {
     }
     
     private func animateIconManually() {
-        // Simple scale down animation
+        // Start with tap highlight invisible
+        tapHighlightIcon.alpha = 0
+        
+        // Scale down and fade in the tap highlight
         UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.5, options: [.curveEaseInOut], animations: {
-            self.leadingIcon.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            // Scale to 80% for both layers
+            let scaleTransform = CGAffineTransform(scaleX: 0.8, y: 0.8)
+            
+            self.leadingIcon.transform = scaleTransform
+            self.tapHighlightIcon.transform = scaleTransform
+            
+            // Fade in the tap highlight as it scales down
+            self.tapHighlightIcon.alpha = 1.0
         }) { _ in
-            // Scale back up after a short pause
+            // Hold the scaled-down state with tap visible for a moment
             UIView.animate(withDuration: 0.35, delay: 0.2, usingSpringWithDamping: 0.6, initialSpringVelocity: 0.5, options: [.curveEaseInOut], animations: {
+                // Scale back to normal for both layers
                 self.leadingIcon.transform = .identity
+                self.tapHighlightIcon.transform = .identity
             }) { _ in
-                // Wait 3 seconds then repeat
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                    if self.window != nil {
-                        self.animateIconManually()
+                // After hitting full scale, fade out the tap highlight (halfway through wait time)
+                UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseOut], animations: {
+                    self.tapHighlightIcon.alpha = 0
+                }) { _ in
+                    // Wait remaining time then repeat
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.8) {
+                        if self.window != nil {
+                            self.animateIconManually()
+                        }
                     }
                 }
             }
@@ -281,9 +348,13 @@ class StickerHeaderView: UICollectionReusableView {
     }
     
     private func stopIconAnimation() {
-        // Clean up all animations and reset transform
+        // Clean up all animations and reset transform for both layers
         leadingIcon.layer.removeAllAnimations()
         leadingIcon.transform = .identity
+        
+        tapHighlightIcon.layer.removeAllAnimations()
+        tapHighlightIcon.transform = .identity
+        tapHighlightIcon.alpha = 0
     }
     
     @objc private func dismissButtonTapped() {
