@@ -13,4 +13,22 @@ class StickerCell: UICollectionViewCell {
     
     @IBOutlet weak var stickerView: MSStickerView!
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        
+        // Make backgrounds transparent so the Liquid Glass effect shows through
+        backgroundColor = .clear
+        contentView.backgroundColor = .clear
+        stickerView?.backgroundColor = .clear
+        self.clipsToBounds = false
+        contentView.clipsToBounds = false
+        
+        // Remove any default shadows/effects from all layers
+        layer.shadowOpacity = 0
+        layer.borderWidth = 0
+        contentView.layer.shadowOpacity = 0
+        contentView.layer.borderWidth = 0
+        stickerView?.layer.shadowOpacity = 0
+        stickerView?.layer.borderWidth = 0
+    }
 }
