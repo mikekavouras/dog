@@ -263,7 +263,7 @@ class StickerHeaderView: UICollectionReusableView {
         blurEffectView.layer.masksToBounds = true
         
         // Make dismiss button fully rounded (circle)
-        dismissButton.layer.cornerRadius = dismissButton.bounds.height / 2
+        dismissButton.layer.cornerRadius = 18
         dismissButton.layer.masksToBounds = true
     }
     
