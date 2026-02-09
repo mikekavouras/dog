@@ -54,7 +54,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("🟢 viewDidLoad called")
         
         // MARK: - DEBUG: Uncomment to reset header dismissal for testing
 //         UserDefaults.standard.removeObject(forKey: "stickerHeaderDismissed")
@@ -76,7 +75,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     private func showLoadingIndicator() {
         guard collectionView?.backgroundView == nil else { return }
         
-        print("📍 Showing loading indicator")
         let loadingBackgroundView = UIView()
         loadingBackgroundView.backgroundColor = .clear
         
@@ -95,18 +93,15 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
     
     private func hideLoadingIndicator() {
-        print("📍 Hiding loading indicator")
         collectionView?.backgroundView = nil
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("🟢 viewWillAppear called")
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        print("🟢 viewDidAppear called - drawer should be visible now")
         
         // Trigger header animation now that everything is visible
         if !hasAnimatedHeader, let header = headerView {
@@ -125,7 +120,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
     
     private func clearCache() {
-        print("🗑️ Clearing cache for testing...")
         
         // Clear sticker files
         if let directoryURL = documentDirectoryPath {
@@ -135,11 +129,8 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                     let files = try manager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
                     for file in files {
                         try manager.removeItem(at: file)
-                        print("   Deleted: \(file.lastPathComponent)")
                     }
-                    print("✅ Cache cleared successfully")
                 } catch {
-                    print("❌ Error clearing cache: \(error)")
                 }
             }
         }
@@ -147,7 +138,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         // Clear metadata
         if let metadataURL = metadataFileURL {
             try? FileManager.default.removeItem(at: metadataURL)
-            print("✅ Metadata cleared")
         }
     }
     
@@ -179,11 +169,9 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     }
 
     private func syncWithCloudKit(directoryURL: URL) async {
-        print("🔄 Starting background sync with CloudKit...")
         
         do {
             let records = try await fetchStickers()
-            print("✅ Fetched \(records.count) stickers from CloudKit")
             
             let metadata = loadStickerMetadata()
             var updatedStickers: [MSSticker] = []
@@ -203,7 +191,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                                    hasRecordChanged(record, metadata: metadata)
                 
                 if needsDownload {
-                    print("   ⬇️ Downloading: \(recordName)")
                     if let asset = record["image"] as? CKAsset,
                        let data = try? Data(contentsOf: asset.fileURL),
                        let image = UIImage(data: data),
@@ -216,7 +203,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                         saveStickerMetadata(recordName: recordName, 
                                           modificationDate: record.modificationDate,
                                           description: description)
-                        print("   ✅ Downloaded: \(recordName)")
                     }
                 }
                 
@@ -235,7 +221,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                     let recordName = localFile.deletingPathExtension().lastPathComponent
                     if !cloudKitRecordNames.contains(recordName) {
                         // This file was deleted from CloudKit - remove it
-                        print("   🗑️ Removing deleted sticker: \(recordName)")
                         try? manager.removeItem(at: localFile)
                         needsUpdate = true
                     }
@@ -256,7 +241,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
             let hasChanges = updatedStickers.count != self.stickers.count || needsUpdate
             
             if hasChanges {
-                print("🔄 Changes detected - updating collection view")
                 await MainActor.run {
                     self.stickers = updatedStickers
                     // Hide loading if this is first launch
@@ -267,7 +251,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                     self.collectionView?.reloadData()
                 }
             } else {
-                print("✅ No changes - stickers are up to date")
                 // Still hide loading if first launch completed successfully
                 if self.isFirstLaunch {
                     await MainActor.run {
@@ -278,25 +261,23 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
             }
             
         } catch {
-            print("❌ CloudKit sync failed: \(error.localizedDescription)")
             
             // Check for specific CloudKit errors
             if let ckError = error as? CKError {
                 switch ckError.code {
                 case .notAuthenticated:
-                    print("⚠️ Not signed into iCloud")
+                    break
                 case .networkUnavailable, .networkFailure:
-                    print("⚠️ Network unavailable")
+                    break
                 case .permissionFailure:
-                    print("⚠️ Permission denied")
+                    break
                 case .unknownItem:
-                    print("⚠️ CloudKit container not found")
+                    break
                 default:
-                    print("⚠️ CloudKit error: \(ckError.code.rawValue)")
+                    break
                 }
             }
             
-            print("📱 Continuing with cached stickers")
         }
     }
     
@@ -352,13 +333,11 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         
         // Load cached stickers SYNCHRONOUSLY on main thread
         // This prevents the flicker on launch by having content ready before first display
-        print("📂 Loading initial stickers synchronously")
         
         guard let fileURLs = try? manager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
             .filter({ $0.pathExtension == "png" })
             .sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
         else {
-            print("📭 No cached stickers - first launch detected")
             isFirstLaunch = true
             showLoadingIndicator()
             // Start async sync for first launch
@@ -379,14 +358,12 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
         }
         
         if !cachedStickers.isEmpty {
-            print("✅ Loaded \(cachedStickers.count) stickers synchronously - ready for display")
             self.stickers = cachedStickers
             isFirstLaunch = false
             
             // Now sync in background
             Task { await syncWithCloudKit(directoryURL: directoryURL) }
         } else {
-            print("⚠️ Found files but couldn't load - showing loading")
             isFirstLaunch = true
             showLoadingIndicator()
             Task { await syncWithCloudKit(directoryURL: directoryURL) }
@@ -400,7 +377,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
                 do {
                     try manager.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
                 } catch {
-                    print("Couldn't create your directory: \(error)")
                 }
             }
         }
@@ -429,18 +405,14 @@ extension StickerCollectionViewController {
 
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        print("📊 numberOfItemsInSection: returning \(stickers.count) stickers")
         return stickers.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        print("📱 cellForItemAt: \(indexPath.item)")
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? StickerCell else {
-            print("   ❌ Failed to dequeue StickerCell")
             return UICollectionViewCell()
         }
         
-        print("   ✅ Setting sticker for cell \(indexPath.item)")
         cell.stickerView.sticker = stickers[indexPath.row]
         return cell
     }
@@ -504,7 +476,6 @@ extension StickerCollectionViewController {
 
 extension StickerCollectionViewController: StickerHeaderViewDelegate {
     func stickerHeaderViewDidTapDismiss(_ headerView: StickerHeaderView) {
-        print("📍 Header dismissed by user")
         
         // Save dismissal state
         isHeaderDismissed = true
