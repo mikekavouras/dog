@@ -20,6 +20,8 @@ class StickerCell: UICollectionViewCell {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         stickerView?.backgroundColor = .clear
+        self.clipsToBounds = false
+        contentView.clipsToBounds = false
         
         // Remove any default shadows/effects from all layers
         layer.shadowOpacity = 0
