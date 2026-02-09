@@ -21,9 +21,6 @@ class StickerCollectionViewController: UICollectionViewController, UICollectionV
     
     // MARK: - Header Configuration
     
-    // Header message constant to avoid duplication
-    private let headerMessage = "Hold a sticker and drag it onto any message"
-    
     // Header dismissal state
     private var isHeaderDismissed: Bool {
         get {
@@ -459,7 +456,7 @@ extension StickerCollectionViewController {
             }
             
             headerView.delegate = self
-            headerView.configure(message: headerMessage)
+            headerView.configure(message: StickerHeaderView.defaultInstruction)
             self.headerView = headerView // Store reference for later animation
             return headerView
         }
@@ -476,7 +473,7 @@ extension StickerCollectionViewController {
         // Only show header if not dismissed and stickers are loaded
         if !isHeaderDismissed && !stickers.isEmpty {
             let width = collectionView.bounds.width
-            let height = StickerHeaderView.calculateHeight(for: width, message: headerMessage)
+            let height = StickerHeaderView.calculateHeight(for: width, message: StickerHeaderView.defaultInstruction)
             return CGSize(width: width, height: height)
         }
         return .zero

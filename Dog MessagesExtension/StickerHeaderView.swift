@@ -16,6 +16,8 @@ class StickerHeaderView: UICollectionReusableView {
     
     static let reuseIdentifier = "StickerHeaderView"
     
+    static let defaultInstruction = "Press and hold a sticker, then drag it onto a message"
+    
     weak var delegate: StickerHeaderViewDelegate?
     
     // MARK: - Layout Constants
@@ -116,7 +118,7 @@ class StickerHeaderView: UICollectionReusableView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "Drag onto messages"
+        label.text = "Stick them on any message!"
         label.font = .systemFont(ofSize: 14, weight: .medium)
         label.textColor = .label
         label.numberOfLines = 1
@@ -131,7 +133,7 @@ class StickerHeaderView: UICollectionReusableView {
     
     private let label: UILabel = {
         let label = UILabel()
-        label.text = "Tap and hold a sticker to drag it onto a message"
+        label.text = StickerHeaderView.defaultInstruction
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textColor = .secondaryLabel
         label.numberOfLines = 0
